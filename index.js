@@ -97,22 +97,32 @@ const keys = {
   ArrowRight: false,
 };
 
-const projectiles = [];
-const asteroids = [];
+const projectiles = []; // initialize projectiles array
+const asteroids = []; // initialize asteroids array
 
+// creating asteroids
 window.setInterval(() => {
   let radius = 50 * Math.random() + 10;
-  const asteroidVelocity = (Math.random() - 0.5) * 2;
+  const randomBinary = [Math.round(Math.random()), Math.round(Math.random())];
+  const asteroidVelocity = [Math.random() * 2, Math.random() * 2];
+
+  if (randomBinary[0] === 1) {
+    asteroidVelocity[0] *= -1;
+  }
+
+  if (randomBinary[1] === 1) {
+    asteroidVelocity[1] *= -1;
+  }
 
   asteroids.push(
     new Asteroid({
       position: {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
+        x: randomBinary[0] * canvas.width,
+        y: randomBinary[1] * canvas.height,
       },
       velocity: {
-        x: asteroidVelocity,
-        y: asteroidVelocity,
+        x: asteroidVelocity[0],
+        y: asteroidVelocity[1],
       },
       radius: radius,
     }),
@@ -164,8 +174,9 @@ function animate() {
   if (keys.ArrowRight) player.rotation += 0.04;
 }
 
-animate();
+animate(); // revoke animation
 
+// player controls
 window.addEventListener("keydown", (event) => {
   switch (event.key) {
     case "ArrowUp":
