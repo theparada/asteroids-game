@@ -15,6 +15,7 @@ class Player {
   }
 
   draw() {
+    ctx.beginPath();
     ctx.save();
     ctx.translate(this.position.x, this.position.y);
     ctx.rotate(this.rotation);
@@ -22,6 +23,7 @@ class Player {
     ctx.arc(this.position.x, this.position.y, 5, 0, Math.PI * 2);
     ctx.fillStyle = "yellow";
     ctx.fill();
+    ctx.closePath();
 
     ctx.beginPath();
     ctx.moveTo(this.position.x + 30, this.position.y);
@@ -34,6 +36,7 @@ class Player {
   }
 
   update() {
+    this.draw();
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
   }
@@ -47,11 +50,33 @@ class Projectile {
   }
 
   draw() {
-    ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.arc(this.position.x, this.position.y, 5, 0, Math.PI * 2);
     ctx.closePath();
+    ctx.fillStyle = "yellow";
     ctx.fill();
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
+class Asteroid {
+  constructor({ position, velocity, radius }) {
+    this.position = position;
+    this.velocity = velocity;
+    this.radius = radius;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.strokeStyle = "white";
+    ctx.stroke();
   }
 
   update() {
@@ -73,6 +98,26 @@ const keys = {
 };
 
 const projectiles = [];
+const asteroids = [];
+
+window.setInterval(() => {
+  let radius = 50 * Math.random() + 10;
+  const asteroidVelocity = (Math.random() - 0.5) * 2;
+
+  asteroids.push(
+    new Asteroid({
+      position: {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+      },
+      velocity: {
+        x: asteroidVelocity,
+        y: asteroidVelocity,
+      },
+      radius: radius,
+    }),
+  );
+}, 3000);
 
 function animate() {
   requestAnimationFrame(animate);
@@ -81,11 +126,10 @@ function animate() {
 
   player.update();
 
+  // removing projectile if it goes off screen
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const projectile = projectiles[i];
     projectile.update();
-
-    // removing projectile if it goes off screen
     if (
       projectile.position.x + projectile.radius < 0 ||
       projectile.position.y + projectile.radius < 0 ||
@@ -93,6 +137,20 @@ function animate() {
       projectile.position.y - projectile.radius > canvas.height
     ) {
       projectiles.splice(i, 1);
+    }
+  }
+
+  // removing asteroid if it goes off screen
+  for (let i = asteroids.length - 1; i >= 0; i--) {
+    const asteroid = asteroids[i];
+    asteroid.update();
+    if (
+      asteroid.position.x + asteroid.radius < 0 ||
+      asteroid.position.y + asteroid.radius < 0 ||
+      asteroid.position.x - asteroid.radius > canvas.width ||
+      asteroid.position.y - asteroid.radius > canvas.height
+    ) {
+      asteroids.splice(i, 1);
     }
   }
 
@@ -104,7 +162,6 @@ function animate() {
   }
   if (keys.ArrowLeft) player.rotation -= 0.04;
   if (keys.ArrowRight) player.rotation += 0.04;
-  player.draw();
 }
 
 animate();
