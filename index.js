@@ -129,6 +129,18 @@ window.setInterval(() => {
   );
 }, 3000);
 
+function objectCollision(obj1, obj2) {
+  const xDiff = obj1.position.x - obj2.position.x;
+  const yDiff = obj1.position.y - obj2.position.y;
+  const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+  if (distance < obj1.radius + obj2.radius) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
   ctx.fillStyle = "black";
@@ -154,6 +166,7 @@ function animate() {
   for (let i = asteroids.length - 1; i >= 0; i--) {
     const asteroid = asteroids[i];
     asteroid.update();
+
     if (
       asteroid.position.x + asteroid.radius < 0 ||
       asteroid.position.y + asteroid.radius < 0 ||
@@ -162,16 +175,24 @@ function animate() {
     ) {
       asteroids.splice(i, 1);
     }
+
+    for (let j = projectiles.length - 1; j >= 0; j--) {
+      const projectile = projectiles[j];
+      if (objectCollision(asteroid, projectile)) {
+        asteroids.splice(i, 1);
+        projectiles.splice(j, 1);
+      }
+    }
   }
 
   player.velocity.x = 0;
   player.velocity.y = 0;
   if (keys.ArrowUp) {
-    player.velocity.x = Math.cos(player.rotation);
-    player.velocity.y = Math.sin(player.rotation);
+    player.velocity.x = Math.cos(player.rotation) * 2;
+    player.velocity.y = Math.sin(player.rotation) * 2;
   }
-  if (keys.ArrowLeft) player.rotation -= 0.04;
-  if (keys.ArrowRight) player.rotation += 0.04;
+  if (keys.ArrowLeft) player.rotation -= 0.08;
+  if (keys.ArrowRight) player.rotation += 0.08;
 }
 
 animate(); // revoke animation
